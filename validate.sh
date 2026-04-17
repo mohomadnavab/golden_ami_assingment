@@ -9,9 +9,13 @@ echo "========================================="
 # -------------------------------
 # 1. LIST IMAGE BUILDER IMAGES
 # -------------------------------
-echo -e "\n✅ Checking Image Builder Images..."
-aws imagebuilder list-images \
-  --query 'imageVersionList[*].{Name:name,Version:version,Status:state}'
+echo -e "\n✅ Checking Image Builder Build Status..."
+
+aws imagebuilder list-image-build-versions \
+  --image-version-arn $(aws imagebuilder list-images \
+    --query 'imageVersionList[-1].arn' \
+    --output text) \
+  --query 'imageSummaryList[*].{ARN:arn,State:state.status}'
 
 # -------------------------------
 # 2. GET LATEST AMI ID
