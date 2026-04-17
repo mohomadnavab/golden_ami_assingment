@@ -1,0 +1,10 @@
+name: IIS
+schemaVersion: 1.0
+phases:
+  - name: build
+    steps:
+      - name: InstallIIS
+        action: ExecutePowerShell
+        inputs:
+          commands:
+            - Install-WindowsFeature Web-Server

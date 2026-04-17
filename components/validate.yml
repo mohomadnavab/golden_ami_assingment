@@ -1,0 +1,11 @@
+name: Validate
+schemaVersion: 1.0
+phases:
+  - name: test
+    steps:
+      - name: CheckIIS
+        action: ExecutePowerShell
+        inputs:
+          commands:
+            - Get-WindowsFeature Web-Server
+            - dotnet --info

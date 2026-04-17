@@ -1,0 +1,35 @@
+name: InstallDotNet
+description: Install latest stable .NET runtime
+schemaVersion: 1.0
+
+phases:
+  - name: build
+    steps:
+      - name: DownloadDotNetInstaller
+        action: ExecutePowerShell
+        inputs:
+          commands:
+            - Write-Host "Downloading .NET installer..."
+            - Invoke-WebRequest -Uri https://dot.net/v1/dotnet-install.ps1 -OutFile dotnet-install.ps1
+
+      - name: InstallDotNet
+        action: ExecutePowerShell
+        inputs:
+          commands:
+            - Write-Host "Installing latest .NET LTS..."
+            - powershell -ExecutionPolicy Bypass -File .\dotnet-install.ps1 -Channel LTS -InstallDir "C:\Program Files\dotnet"
+
+      - name: SetPath
+        action: ExecutePowerShell
+        inputs:
+          commands:
+            - Write-Host "Setting PATH..."
+            - $env:Path += ";C:\Program Files\dotnet"
+            - [Environment]::SetEnvironmentVariable("Path", $env:Path, [EnvironmentVariableTarget]::Machine)
+
+      - name: VerifyDotNet
+        action: ExecutePowerShell
+        inputs:
+          commands:
+            - Write-Host "Verifying .NET installation..."
+            - dotnet --version
