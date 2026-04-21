@@ -1,71 +1,12 @@
-# -----------------------------
 # Terraform
-# -----------------------------
 .terraform/
 *.tfstate
 *.tfstate.*
 crash.log
-override.tf
-override.tf.json
-*_override.tf
-*_override.tf.json
+
+# Terraform lock (optional keep or ignore)
 .terraform.lock.hcl
 
-# -----------------------------
-# Terraform Variables (Sensitive)
-# -----------------------------
-*.tfvars
-*.tfvars.json
-
-# -----------------------------
-# AWS / Credentials
-# -----------------------------
-.aws/
-credentials
-config
-
-# -----------------------------
-# Logs
-# -----------------------------
-*.log
-logs/
-*.out
-
-# -----------------------------
-# OS Files
-# -----------------------------
+# OS
 .DS_Store
 Thumbs.db
-
-# -----------------------------
-# IDE / Editor
-# -----------------------------
-.vscode/
-.idea/
-*.swp
-
-# -----------------------------
-# Shell Scripts Temp
-# -----------------------------
-*.tmp
-*.bak
-
-# -----------------------------
-# Node / Python (if used)
-# -----------------------------
-node_modules/
-venv/
-__pycache__/
-
-# -----------------------------
-# Zip / Build Artifacts
-# -----------------------------
-*.zip
-*.tar
-*.gz
-
-# -----------------------------
-# Environment Files
-# -----------------------------
-.env
-.env.*
