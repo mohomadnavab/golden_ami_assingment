@@ -1,27 +1,78 @@
 name: InstallDotNet
-description: Install .NET LTS
+description: Install .NET LTS (Production Ready)
 schemaVersion: 1.0
 
 phases:
   - name: build
     steps:
-      - name: Step1
-        action: ExecutePowerShell
-        inputs:
-          commands:
-            - Write-Host "Download script"
-            - Invoke-WebRequest -Uri https://dot.net/v1/dotnet-install.ps1 -OutFile dotnet-install.ps1
 
-      - name: Step2
+      # ─────────────────────────────────────────────
+      # Step 1: Download Installer Script
+      # ─────────────────────────────────────────────
+      - name: DownloadScript
         action: ExecutePowerShell
         inputs:
           commands:
-            - Write-Host "Install .NET"
-            - powershell -ExecutionPolicy Bypass -File .\dotnet-install.ps1 -Channel LTS -InstallDir C:\dotnet
+            - Write-Host "Downloading .NET install script..."
+            - Invoke-WebRequest -Uri https://dot.net/v1/dotnet-install.ps1 -OutFile dotnet-install.ps1 -UseBasicParsing
+            - if (!(Test-Path ".\dotnet-install.ps1")) { throw "Download failed" }
 
-      - name: Step3
+      # ─────────────────────────────────────────────
+      # Step 2: Install .NET (Idempotent)
+      # ─────────────────────────────────────────────
+      - name: InstallDotNet
         action: ExecutePowerShell
         inputs:
           commands:
-            - Write-Host "Verify"
-            - C:\dotnet\dotnet.exe --version
+            - Write-Host "Installing .NET LTS..."
+            - |
+              if (Test-Path "C:\dotnet\dotnet.exe") {
+                  Write-Host "⚠️ .NET already installed. Skipping install."
+              } else {
+                  powershell -ExecutionPolicy Bypass -File .\dotnet-install.ps1 -Channel LTS -InstallDir C:\dotnet
+              }
+
+      # ─────────────────────────────────────────────
+      # Step 3: Set PATH (Persistent)
+      # ─────────────────────────────────────────────
+      - name: SetPath
+        action: ExecutePowerShell
+        inputs:
+          commands:
+            - Write-Host "Setting PATH..."
+            - |
+              $dotnetPath = "C:\dotnet"
+              $currentPath = [Environment]::GetEnvironmentVariable("Path", [EnvironmentVariableTarget]::Machine)
+
+              if ($currentPath -notlike "*$dotnetPath*") {
+                  [Environment]::SetEnvironmentVariable(
+                      "Path",
+                      "$currentPath;$dotnetPath",
+                      [EnvironmentVariableTarget]::Machine
+                  )
+                  Write-Host "✅ PATH updated"
+              } else {
+                  Write-Host "ℹ️ PATH already contains .NET"
+              }
+
+      # ─────────────────────────────────────────────
+      # Step 4: Verify Installation (Strict)
+      # ─────────────────────────────────────────────
+      - name: VerifyInstallation
+        action: ExecutePowerShell
+        inputs:
+          commands:
+            - Write-Host "Verifying .NET installation..."
+            - |
+              $env:Path += ";C:\dotnet"
+
+              if (!(Test-Path "C:\dotnet\dotnet.exe")) {
+                  throw "❌ dotnet executable not found"
+              }
+
+              $version = & "C:\dotnet\dotnet.exe" --version
+              Write-Host "✅ Installed .NET Version: $version"
+
+              if (-not $version) {
+                  throw "❌ Version check failed"
+              }
